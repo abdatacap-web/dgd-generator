@@ -1,16 +1,15 @@
-"""
-DGD (Dangerous Goods Declaration) Auto-Generator
---------------------------------------------------
-Reads consignment line items from an Annexure Excel file, groups them
-according to the 5-point checkpoint logic, and produces one DGD per
-group using the company's DGD template layout.
+# DGD (Dangerous Goods Declaration) Auto-Generator
+# --------------------------------------------------
+# Reads consignment line items from an Annexure Excel file, groups them
+# according to the 5-point checkpoint logic, and produces one DGD per
+# group using the company's DGD template layout.
+#
+# USAGE:
+#     python generate_dgd.py <Annexure.xlsx> <DGD_Template.xlsx> <output_folder>
+#
+# Annexure sheet expected: "Filtered Data" (the shipment's actual line items).
+# Template expected: single sheet with the same cell layout as MANUAL_DGD1.xlsx.
 
-USAGE:
-    python generate_dgd.py <Annexure.xlsx> <DGD_Template.xlsx> <output_folder>
-
-Annexure sheet expected: "Filtered Data" (the shipment's actual line items).
-Template expected: single sheet with the same cell layout as MANUAL_DGD1.xlsx.
-"""
 
 import sys
 import re
@@ -93,9 +92,19 @@ CELLS = {
 }
 
 HEADER_CELLS = {
-    "shipper_lines": ["A9", "A10", "A11", "A12"],
+    "shipper_lines": [
+        "A9",
+        "A10",
+        "A11",
+        "A12"
+    ],
     "emergency_contact": "D15",
-    "consignee_lines": ["A17", "A18", "A19", "A20"],
+    "consignee_lines": [
+        "A17",
+        "A18",
+        "A19",
+        "A20"
+    ],
     "carrier": "D17",
     "carrier_booking_number": "D18",  # note: template row for value may need adjusting
     "packer_signatory_company": "D22",
@@ -110,7 +119,6 @@ HEADER_CELLS = {
     "shipper_decl_place_date": "D57",
     "shipper_decl_signatory_name": "D60",
 }
-
 
 def parse_flash_point(text):
     """Extract numeric °C value from strings like '4.47 DEG CEL'."""
@@ -191,7 +199,7 @@ def aggregate_group(rows):
     # unique technical names, in order of first appearance
     tech_names = []
     for r in rows:
-        name = r[COL["technical_name"]]
+        name = r[COL["technical_name"]] 
         if name and name not in tech_names:
             tech_names.append(str(name))
     technical_name = " , ".join(tech_names)
@@ -199,7 +207,7 @@ def aggregate_group(rows):
     # unique packing codes, in order of first appearance
     pkg_codes = []
     for r in rows:
-        code = r[COL["un_cert_no_1"]]
+        code = r[COL["un_cert_no_1"]] 
         if code and code not in pkg_codes:
             pkg_codes.append(str(code))
     packing_code = " , ".join(pkg_codes)
@@ -244,6 +252,9 @@ def fill_header(ws, header):
     ws[HEADER_CELLS["shipper_decl_company"]] = header["shipper_decl_company"]
     ws[HEADER_CELLS["shipper_decl_place_date"]] = header["shipper_decl_place_date"]
     ws[HEADER_CELLS["shipper_decl_signatory_name"]] = header["shipper_decl_signatory_name"]
+    ws[HEADER_CELLS["carrier_booking_number"]] = header["carrier_booking_number"]
+    ws[HEADER_CELLS["ship_name_voyage"]] = header["ship_name_voyage"]
+    ws[HEADER_CELLS["container_numbers"]] = header["container_numbers"]
 
 
 def fill_group_fields(ws, data):
@@ -295,9 +306,6 @@ def generate(annexure_path, template_path, output_dir):
     print(f"\nDone. {len(generated_files)} DGD file(s) written to: {output_dir}")
     return generated_files
 
-
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python generate_dgd.py <Annexure.xlsx> <DGD_Template.xlsx> <output_folder>")
-        sys.exit(1)
-    generate(sys.argv[1], sys.argv[2], sys.argv[3])
+# Removed the __main__ block to prevent SystemExit when running in Colab.
+# You can now call the generate function directly with appropriate arguments.
+# Example: generate("path/to/Annexure.xlsx", "path/to/DGD_Template.xlsx", "path/to/output_folder")
