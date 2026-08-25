@@ -1,5 +1,3 @@
-streamlit
-pandas
-openpyxl
-pdfplumber
-xlrd
+streamlit>=1.35
+openpyxl>=3.1
+pdfplumber>=0.11
